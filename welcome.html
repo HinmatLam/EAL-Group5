@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Management System</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    }
+
+    .search-section {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    input, button {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #45a049;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background: #f8f9fa;
+    }
+
+    tr:hover {
+      background: #f1f1f1;
+    }
+
+    .action-buttons button {
+      margin: 0 5px;
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+
+    .add-form {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Student Grade Management System</h1>
+    
+    <form class="add-form" id="addForm">
+      <legend>Add Student Information</legend>
+      <ul>
+        <li>Student ID:<input type="number" id="studentId" /></li>
+        <li>Name:<input type="text" id="name" /></li>
+        <li>Class:<input type="text" id="classes" /></li>
+        <li>Course:<input type="text" id="course" /></li>
+        <li>Grade:<input type="number" id="grade" /></li>
+        <li><input type="submit" value="Add" /></li>
+      </ul>
+    </form>
+
+    <div class="search-section">
+      <input type="text" id="searchInput" placeholder="Enter Student ID">
+      <button onclick="searchStudent()">Search</button>
+      <button onclick="queryAll()">Show All</button>
+    </div>
+
+    <table id="studentTable">
+      <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>Name</th>
+          <th>Class</th>
+          <th>Course</th>
+          <th>Grade</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="result">
+      </tbody>
+    </table>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
