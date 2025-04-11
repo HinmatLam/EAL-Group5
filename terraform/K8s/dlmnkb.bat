@@ -1,0 +1,1 @@
+https://github.com/kubernetes/minikube/releases/latest/download/minikube-windows-amd64.exe
