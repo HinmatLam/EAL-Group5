@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style type="text/css">
+<!--
+body {
+	margin-left: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+}
+.STYLE1 {font-size: 12px}
+.STYLE4 {
+	font-size: 12px;
+	color: #1F4A65;
+	font-weight: bold;
+}
+
+a:link {
+	font-size: 12px;
+	color: #06482a;
+	text-decoration: none;
+
+}
+a:visited {
+	font-size: 12px;
+	color: #06482a;
+	text-decoration: none;
+}
+a:hover {
+	font-size: 12px;
+	color: #FF0000;
+	text-decoration: underline;
+}
+a:active {
+	font-size: 12px;
+	color: #FF0000;
+	text-decoration: none;
+}
+.STYLE7 {font-size: 12px}
+
+-->
+</style>
+
+</head>
+<body>
+
+<table width="80%" border="0" align="center" cellpadding="0" cellspacing="0">
+            <tr>&nbsp;</tr>
+            <tr>&nbsp;</tr>
+  <tr>
+    <td height="30">
+    	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+
+      		<tr>
+		        <td width="15" height="30"></td>
+		        <td width="1101" ><span style="font-size: large">欢迎您, {{ uname }}!</span></td>
+		        <td width="281"></td>
+        	 </tr>
+       </table>
+    </td>
+  </tr>
+    <tr align="center" >
+        <td  align="center" style="font-size: x-large;height: 100px">学生管理系统(成绩查询)</td>
+    </tr>
+    <tr>
+        <form action="/stu_index/" method="post" id="form">{% csrf_token %}
+            <table  border="0" cellspacing="1" cellpadding="0" align="center">
+                <tr><td colspan="3" align="center" style="color: cadetblue;font-size: larger">条件检索</td></tr>
+                <tr>
+                    <td style="display: none"><input class="text_value"  value="{{ uname }}" name="username" type="text" ></td>
+                    <td style="display: none"><input class="text_value"  value="{{ upwd }}" name="password" type="text" ></td>
+                </tr>
+                <tr>
+                    <td>年级：<input class="text_value"  value="" name="nianji" type="text" id="username"></td>
+                    <td>学期：<td><input class="text_value"  value="" name="xueqi" type="text" id="username"></td></td>
+                    <td><input type="submit" value="搜索"></td>
+                </tr>
+            </table>
+            <br><br><br><br>
+        </form>
+    </tr>
+
+  <tr>
+    <td><table align="center" width="80%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="9">&nbsp</td>
+        <td bgcolor="#f3ffe3">
+            <table width="99%" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#c0de98" onmouseover="changeto()"  onmouseout="changeback()">
+                <tr>
+                    <th>科目</th>
+                    <th>分数</th>
+                    <th>年级</th>
+                    <th>学期</th>
+                </tr>
+                {% for x in stu %}
+                  <tr>
+                    <td height="18" bgcolor="#FFFFFF"><div align="center" class="STYLE2 STYLE1">{{x.stu_course}}</div></td>
+                    <td height="18" bgcolor="#FFFFFF"><div align="center" class="STYLE2 STYLE1">{{x.stu_score}}</div></td>
+                    <td height="18" bgcolor="#FFFFFF"><div align="center" class="STYLE2 STYLE1">{{x.stu_nianji}}</div></td>
+                    <td height="18" bgcolor="#FFFFFF"><div align="center">{{x.stu_xueqi}}</div></td>
+                 </tr>
+              {% endfor %}
+            </table>
+        </td>
+      </tr>
+    </table></td>
+  </tr>
+
+</table>
+
+</body>
+</html>
