@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學習群組平台</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f0f0; }
+        header { background-color: #4CAF50; color: white; padding: 15px; text-align: center; }
+        nav { margin: 20px; text-align: center; }
+        .container { padding: 20px; max-width: 800px; margin: 0 auto; }
+        .group { 
+            background: white; 
+            border: 1px solid #ccc; 
+            margin-bottom: 10px; 
+            padding: 10px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .button { 
+            background-color: #4CAF50; 
+            color: white; 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin: 0 10px; 
+        }
+        .button:hover { background-color: #45a049; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>學習群組平台</h1>
+</header>
+
+<nav>
+    <button class="button" onclick="createGroup()">建立群組</button>
+    <button class="button" onclick="window.location.href='chat.html'">聊天</button>
+    <button class="button" onclick="window.location.href='welcome.html'">成績管理</button>
+</nav>
+
+<div class="container" id="groups">
+    <h2>可加入的群組</h2>
+    <!-- 群組列表將在這裡顯示 -->
+</div>
+
+<script>
+    const groups = [];
+
+    function createGroup() {
+        const groupName = prompt("請輸入群組名稱:");
+        if (groupName) {
+            const group = { name: groupName, members: [], id: groups.length };
+            groups.push(group);
+            displayGroups();
+        }
+    }
+
+    function displayGroups() {
+        const groupContainer = document.getElementById('groups');
+        groupContainer.innerHTML = '<h2>可加入的群組</h2>';
+        groups.forEach((group, index) => {
+            groupContainer.innerHTML += `
+                <div class="group">
+                    <h3>${group.name}</h3>
+                    <p>成員: ${group.members.length > 0 ? group.members.join(', ') : '無'}</p>
+                    <button class="button" onclick="joinGroup(${index})">加入群組</button>
+                </div>
+            `;
+        });
+    }
+
+    function joinGroup(index) {
+        const group = groups[index];
+        const memberName = prompt("請輸入你的名字:");
+        if (memberName) {
+            group.members.push(memberName);
+            alert(`${memberName} 已成功加入 ${group.name} 群組！`);
+            displayGroups();
+        }
+    }
+</script>
+
+</body>
+</html>
