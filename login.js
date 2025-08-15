@@ -8,7 +8,7 @@ function loginUser() {
 
     if (loginUsername === storedUsername && loginPassword === storedPassword) {
         // Login successful, redirect to the second page
-        window.location.href = "welcome.html";
+        window.location.href = "home page.html";
     } else {
         alert("Incorrect username or password. Please try again.");
     }
