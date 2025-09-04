@@ -1,4 +1,43 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
@@ -27,61 +66,80 @@
             margin: 0 10px; 
         }
         .button:hover { background-color: #45a049; }
+        input { 
+            padding: 10px; 
+            margin: 5px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+        }
     </style>
 </head>
 <body>
+    <header>
+        <h1>學習群組平台</h1>
+    </header>
+    <nav>
+        <input type="text" id="groupName" placeholder="輸入群組名稱">
+        <button class="button" onclick="createGroup()">建立群組</button>
+        <button class="button" onclick="window.location.href='chat.html'">聊天</button>
+        <button class="button" onclick="window.location.href='welcome.html'">成績管理</button>
+    </nav>
+    <div class="container" id="groups">
+        <h2>可加入的群組</h2>
+        <!-- 群組列表將在這裡顯示 -->
+    </div>
 
-<header>
-    <h1>學習群組平台</h1>
-</header>
-
-<nav>
-    <button class="button" onclick="createGroup()">建立群組</button>
-    <button class="button" onclick="window.location.href='chat.html'">聊天</button>
-    <button class="button" onclick="window.location.href='welcome.html'">成績管理</button>
-</nav>
-
-<div class="container" id="groups">
-    <h2>可加入的群組</h2>
-    <!-- 群組列表將在這裡顯示 -->
-</div>
-
-<script>
-    const groups = [];
-
-    function createGroup() {
-        const groupName = prompt("請輸入群組名稱:");
-        if (groupName) {
-            const group = { name: groupName, members: [], id: groups.length };
-            groups.push(group);
-            displayGroups();
+    <script>
+        // Load groups from localStorage
+        function loadGroups() {
+            const groups = JSON.parse(localStorage.getItem('groups')) || [];
+            const groupContainer = document.getElementById('groups');
+            groupContainer.innerHTML = '<h2>可加入的群組</h2>';
+            groups.forEach((group, index) => {
+                groupContainer.innerHTML += `
+                    <div class="group">
+                        <h3>${group.name}</h3>
+                        <p>成員: ${group.members.length > 0 ? group.members.join(', ') : '無'}</p>
+                        <button class="button" onclick="joinGroup(${index})">加入群組</button>
+                    </div>
+                `;
+            });
         }
-    }
 
-    function displayGroups() {
-        const groupContainer = document.getElementById('groups');
-        groupContainer.innerHTML = '<h2>可加入的群組</h2>';
-        groups.forEach((group, index) => {
-            groupContainer.innerHTML += `
-                <div class="group">
-                    <h3>${group.name}</h3>
-                    <p>成員: ${group.members.length > 0 ? group.members.join(', ') : '無'}</p>
-                    <button class="button" onclick="joinGroup(${index})">加入群組</button>
-                </div>
-            `;
-        });
-    }
-
-    function joinGroup(index) {
-        const group = groups[index];
-        const memberName = prompt("請輸入你的名字:");
-        if (memberName) {
-            group.members.push(memberName);
-            alert(`${memberName} 已成功加入 ${group.name} 群組！`);
-            displayGroups();
+        // Create a new group
+        function createGroup() {
+            const groupName = document.getElementById('groupName').value.trim();
+            if (groupName) {
+                const groups = JSON.parse(localStorage.getItem('groups')) || [];
+                if (!groups.some(g => g.name === groupName)) {
+                    const group = { name: groupName, members: [], id: groups.length };
+                    groups.push(group);
+                    localStorage.setItem('groups', JSON.stringify(groups));
+                    document.getElementById('groupName').value = '';
+                    loadGroups();
+                } else {
+                    alert('群組名稱已存在！');
+                }
+            } else {
+                alert('請輸入群組名稱！');
+            }
         }
-    }
-</script>
 
+        // Join a group
+        function joinGroup(index) {
+            const groups = JSON.parse(localStorage.getItem('groups')) || [];
+            const group = groups[index];
+            const memberName = prompt("請輸入你的名字:");
+            if (memberName) {
+                group.members.push(memberName);
+                localStorage.setItem('groups', JSON.stringify(groups));
+                alert(`${memberName} 已成功加入 ${group.name} 群組！`);
+                loadGroups();
+            }
+        }
+
+        // Initialize
+        window.onload = loadGroups;
+    </script>
 </body>
 </html>
