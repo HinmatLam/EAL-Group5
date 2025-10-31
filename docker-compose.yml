@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: alotovsky/25fyp-mysql:8.0
+    container_name: 25fyp-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: your_root_password  # 设置根密码
+      MYSQL_DATABASE: 25fyp_db                 # 可选：创建默认数据库
+      MYSQL_USER: 25fyp_user                   # 可选：创建应用用户
+      MYSQL_PASSWORD: your_app_password        # 可选：应用用户密码
+    ports:
+      - "3306:3306"                            # 映射 MySQL 端口
+    volumes:
+      - mysql_data:/var/lib/mysql              # 持久化数据
+    restart: unless-stopped
+
+  backend:
+    image: alotovsky/25fyp-backend:latest
+    container_name: 25fyp-backend
+    environment:
+      # 示例环境变量，根据后端需求调整（例如连接数据库）
+      DB_HOST: mysql                           # 指向 MySQL 服务
+      DB_PORT: 3306
+      DB_NAME: 25fyp_db
+      DB_USER: 25fyp_user
+      DB_PASSWORD: your_app_password
+      # 其他如 JWT_SECRET 等，根据文档添加
+    ports:
+      - "8080:8080"                            # 假设后端暴露 8080 端口
+    depends_on:
+      - mysql                                 # 等待 MySQL 启动
+    restart: unless-stopped
+
+  frontend:
+    image: alotovsky/25fyp-frontend:latest
+    container_name: 25fyp-frontend
+    ports:
+      - "80:80"                                # 假设前端暴露 80 端口（或 3000，根据实际）
+    depends_on:
+      - backend                               # 等待后端启动
+    restart: unless-stopped
+
+volumes:
+  mysql_data:  # 持久化卷
