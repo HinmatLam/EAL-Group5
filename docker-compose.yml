@@ -1,45 +1,90 @@
 version: '3.8'
 
 services:
-  mysql:
-    image: alotovsky/25fyp-mysql:8.0
-    container_name: 25fyp-mysql
+  # ---------- MySQL ----------
+  db:
+    image: alotovsky/25fyp-mysql:8.0          # <-- your image
+    container_name: fyp_mysql
+    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: your_root_password  # 设置根密码
-      MYSQL_DATABASE: 25fyp_db                 # 可选：创建默认数据库
-      MYSQL_USER: 25fyp_user                   # 可选：创建应用用户
-      MYSQL_PASSWORD: your_app_password        # 可选：应用用户密码
-    ports:
-      - "3306:3306"                            # 映射 MySQL 端口
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: db_exam
+      MYSQL_USER: examuser
+      MYSQL_PASSWORD: exam123456
+      TZ: Asia/Shanghai
     volumes:
-      - mysql_data:/var/lib/mysql              # 持久化数据
-    restart: unless-stopped
+      - mysql_data:/var/lib/mysql
+      # If you still want the init scripts, mount them from host:
+      # - ./database/db_exam.sql:/docker-entrypoint-initdb.d/01-structure.sql
+      # - ./database/init_practice_data.sql:/docker-entrypoint-initdb.d/02-init-data.sql
+    ports:
+      - "3307:3306"
+    networks:
+      - fyp_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # ---------- Django Backend ----------
   backend:
-    image: alotovsky/25fyp-backend:latest
-    container_name: 25fyp-backend
+    image: alotovsky/25fyp-backend:v2.5      # <-- your image
+    container_name: fyp_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      bash -c "
+      echo 'Waiting for DB...' &&
+      sleep 10 &&
+      python manage.py migrate --noinput &&
+      python manage.py collectstatic --noinput || true &&
+      python manage.py runserver 0.0.0.0:8000
+      "
     environment:
-      # 示例环境变量，根据后端需求调整（例如连接数据库）
-      DB_HOST: mysql                           # 指向 MySQL 服务
+      DATABASE_URL: mysql://examuser:exam123456@db:3306/db_exam
+      DB_HOST: db
       DB_PORT: 3306
-      DB_NAME: 25fyp_db
-      DB_USER: 25fyp_user
-      DB_PASSWORD: your_app_password
-      # 其他如 JWT_SECRET 等，根据文档添加
+      DB_NAME: db_exam
+      DB_USER: examuser
+      DB_PASSWORD: exam123456
+      SECRET_KEY: django-insecure-bh^5636f!$(au7fy^nzn()6*4ht974p(&pzcd&9z_**=t%^+^4
+      DEBUG: "True"
+      ALLOWED_HOSTS: localhost,127.0.0.1,0.0.0.0,backend
+      CORS_ALLOWED_ORIGINS: http://localhost:8080,http://127.0.0.1:8080
+      CSRF_TRUSTED_ORIGINS: http://localhost:8080,http://127.0.0.1:8080
+      ZHIPUAI_API_KEY: ""
+      ZHIPUAI_MODEL: glm-4-air
+      ZHIPUAI_BASE_URL: https://open.bigmodel.cn/api/paas/v4
     ports:
-      - "8080:8080"                            # 假设后端暴露 8080 端口
-    depends_on:
-      - mysql                                 # 等待 MySQL 启动
-    restart: unless-stopped
+      - "8000:8000"
+    networks:
+      - fyp_network
+    stdin_open: true
+    tty: true
 
+  # ---------- Vue Frontend ----------
   frontend:
-    image: alotovsky/25fyp-frontend:latest
-    container_name: 25fyp-frontend
-    ports:
-      - "80:80"                                # 假设前端暴露 80 端口（或 3000，根据实际）
-    depends_on:
-      - backend                               # 等待后端启动
+    image: alotovsky/25fyp-frontend:v2.5     # <-- your image
+    container_name: fyp_frontend
     restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      - VUE_APP_API_BASE_URL=http://localhost:8000
+    ports:
+      - "8080:8080"
+    networks:
+      - fyp_network
+    stdin_open: true
+    tty: true
 
 volumes:
-  mysql_data:  # 持久化卷
+  mysql_data:
+    driver: local
+
+networks:
+  fyp_network:
+    driver: bridge
